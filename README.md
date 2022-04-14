@@ -1,34 +1,43 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a reproduction case for an issue where using `next-swc` instead of `babel` causes bundle sizes to get larger, because `next-swc` does not use `browserslist`. This project was created with `create-next-app` and includes no additional code, and no additional dependencies, except for babel.
 
-## Getting Started
+Conversation is here: https://github.com/vercel/next.js/discussions/30237#discussioncomment-2288587
 
-First, run the development server:
+## Test results
 
-```bash
-npm run dev
-# or
-yarn dev
+### With `next-swc`
+
+```
+Page                                       Size     First Load JS
+┌ ○ /                                      6.26 kB        80.7 kB
+├   └ css/149b18973e5508c7.css             655 B
+├   /_app                                  0 B            74.5 kB
+├ ○ /404                                   192 B          74.7 kB
+└ λ /api/hello                             0 B            74.5 kB
++ First Load JS shared by all              74.5 kB
+  ├ chunks/framework-00b57966872fc495.js   44.9 kB
+  ├ chunks/main-f4ae3437c92c1efc.js        28.3 kB
+  ├ chunks/pages/_app-f55443f2448c8e66.js  493 B
+  ├ chunks/webpack-69bfa6990bb9e155.js     769 B
+  └ css/27d177a30947857b.css               194 B
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### With `babel`
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```
+Page                                       Size     First Load JS
+┌ ○ /                                      6.67 kB        72.9 kB
+├   └ css/149b18973e5508c7.css             655 B
+├   /_app                                  0 B            66.2 kB
+├ ○ /404                                   2.51 kB        68.7 kB
+└ λ /api/hello                             0 B            66.2 kB
++ First Load JS shared by all              66.2 kB
+├ chunks/framework-00b57966872fc495.js   44.9 kB
+├ chunks/main-ea7e989417432124.js        19.3 kB
+├ chunks/pages/_app-61908809f3d5c637.js  553 B
+├ chunks/webpack-d27a0b5d1fa67d61.js     1.48 kB
+└ css/27d177a30947857b.css               194 B
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Test it yourself
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Simply add or remove `babel.config.js`, which will toggle the `babel`-based build on and off. You can also try enabling/disabling `swcMinify` in `next.config.js` (note that this has no effect on bundle sizes).
